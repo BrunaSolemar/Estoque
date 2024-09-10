@@ -1,0 +1,15 @@
+table{
+    
+    border-collapse: separate;
+}
+td{
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.alerta {
+    background-color: red !important;
+    color: white;
+}

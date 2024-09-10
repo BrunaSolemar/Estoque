@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Estoque</title>
+    <style>
+        .alerta {
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bem-vindo ao Sistema de Controle de Estoque</h1>
+    <p>Aqui você pode gerenciar seus alimentos e itens de higiene.</p>
+    
+    <table id="tabela-alimentos">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Quantidade</th>
+                <th>Peguei</th>
+                <th>Valor Unitário</th>
+                <th>Valor Atual</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
+    <h2>Totais</h2>
+    <p>Total Valor Unitário: <span id="total-valor-unitario">R$ 0,00</span></p>
+    <p>Total Valor Atual: <span id="total-valor-atual">R$ 0,00</span></p>
+    
+    <script src="estoque.js"></script>
+</body>
+</html>
