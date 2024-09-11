@@ -135,6 +135,42 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+  // Função para salvar dados no Local Storage
+function salvarDados(id, quantidade, peguei, valor_unitario, valor_atual) {
+    const alimento = { quantidade, peguei, valor_unitario, valor_atual };
+    localStorage.setItem(`alimento_${id}`, JSON.stringify(alimento));
+  }
+  
+  // Função para carregar dados do Local Storage
+  function carregarDados(id) {
+    const alimento = localStorage.getItem(`alimento_${id}`);
+    return alimento ? JSON.parse(alimento) : null;
+  }
+  
+  // Função para carregar dados ao iniciar a página
+  window.onload = function() {
+    const id = 1; // ID do alimento
+    const dados = carregarDados(id);
+    if (dados) {
+      document.getElementById('quantidade').value = dados.quantidade;
+      document.getElementById('peguei').value = dados.peguei;
+      document.getElementById('valor_unitario').value = dados.valor_unitario;
+      document.getElementById('valor_atual').value = dados.valor_atual;
+    }
+  }
+  
+  // Função para salvar dados ao clicar no botão
+  function salvar() {
+    const id = 1; // ID do alimento
+    const quantidade = document.getElementById('quantidade').value;
+    const peguei = document.getElementById('peguei').value;
+    const valor_unitario = document.getElementById('valor_unitario').value;
+    const valor_atual = document.getElementById('valor_atual').value;
+    salvarDados(id, quantidade, peguei, valor_unitario, valor_atual);
+  }
+  
+  
+
     tabelaBody.addEventListener('change', async function(event) {
         const target = event.target;
         if (target.classList.contains('peguei') || target.classList.contains('valor-unitario')) {
