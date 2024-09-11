@@ -115,13 +115,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
     async function carregarAlimentos() {
         try {
-            const response = await fetch('/alimentos');
-            const alimentos = await response.json();
-            renderizarAlimentos(alimentos);
+          const response = await fetch(API_URL);
+          if (!response.ok) {
+            throw new Error('Erro ao carregar alimentos');
+          }
+          const data = await response.json();
+          // Processar os dados
         } catch (error) {
-            console.error('Erro ao carregar alimentos:', error);
+          console.error('Erro ao carregar alimentos:', error);
         }
-    }
+      }
+      
 
     async function atualizarAlimento(id, dados) {
         try {
@@ -134,6 +138,8 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Erro ao atualizar alimento:', error);
         }
     }
+
+    const API_URL = 'https://brunasolemar.github.io/alimentos';
 
   // Função para salvar dados no Local Storage
 function salvarDados(id, quantidade, peguei, valor_unitario, valor_atual) {
