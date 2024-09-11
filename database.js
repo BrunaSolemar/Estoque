@@ -1,72 +1,34 @@
-const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const db = require('./database');
-const app = express();
-const port = 3000;
 
-// Middleware para permitir envio de JSON
-app.use(express.json());
+// Caminho para o arquivo de banco de dados
+const dbPath = path.resolve(__dirname, 'estoque.db');
 
-// Servir arquivos estáticos da pasta atual (exemplo: HTML, CSS, JS)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Rota para listar alimentos
-app.get('/alimentos', (req, res) => {
-  db.all('SELECT * FROM alimentos', (err, rows) => {
-    if (err) {
-      res.status(500).send("Erro ao buscar alimentos");
-    } else {
-      res.json(rows);
-    }
-  });
+// Conectar ao banco de dados SQLite
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Erro ao conectar ao banco de dados:', err);
+  } else {
+    console.log('Conectado ao banco de dados SQLite.');
+  }
 });
 
-// Rota para atualizar alimento
-app.put('/alimentos/:id', (req, res) => {
-  const { quantidade, peguei, valor_unitario, valor_atual } = req.body;
-  const id = req.params.id;
-
-  db.run(`
-    UPDATE alimentos 
-    SET quantidade = ?, peguei = ?, valor_unitario = ?, valor_atual = ? 
-    WHERE id = ?
-  `, [quantidade, peguei, valor_unitario, valor_atual, id], function(err) {
-    if (err) {
-      res.status(500).send("Erro ao atualizar o alimento");
-    } else {
-      res.sendStatus(200);
-    }
-  });
+// Criar a tabela de alimentos se não existir
+db.run(`
+  CREATE TABLE IF NOT EXISTS alimentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    quantidade INTEGER NOT NULL,
+    peguei INTEGER NOT NULL,
+    valor_unitario REAL NOT NULL,
+    valor_atual REAL NOT NULL
+  )
+`, (err) => {
+  if (err) {
+    console.error('Erro ao criar a tabela de alimentos:', err);
+  } else {
+    console.log('Tabela de alimentos criada ou já existe.');
+  }
 });
 
-// Rota para adicionar alimento
-app.post('/alimentos', (req, res) => {
-  const { nome, quantidade, valor_unitario, valor_atual } = req.body;
-  db.run(`
-    INSERT INTO alimentos (nome, quantidade, valor_unitario, valor_atual) 
-    VALUES (?, ?, ?, ?)
-  `, [nome, quantidade, valor_unitario, valor_atual], function(err) {
-    if (err) {
-      res.status(500).send("Erro ao adicionar o alimento");
-    } else {
-      res.status(201).send("Alimento adicionado com sucesso");
-    }
-  });
-});
-
-// Rota para deletar um alimento
-app.delete('/alimentos/:id', (req, res) => {
-  const id = req.params.id;
-  db.run('DELETE FROM alimentos WHERE id = ?', [id], function(err) {
-    if (err) {
-      res.status(500).send("Erro ao deletar o alimento");
-    } else {
-      res.sendStatus(200);
-    }
-  });
-});
-
-// Iniciar o servidor
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
+module.exports = db;
