@@ -24,26 +24,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function renderizarAlimentos(alimentos) {
         tabelaBody.innerHTML = ''; // Limpa a tabela existente
-
+    
         alimentos.forEach(alimento => {
             const newRow = document.createElement('tr');
-            if (alimento === 'Luka' || alimento === 'Higiene Pessoal' || alimento === 'Limpeza' || alimento === 'Itens Casa') {
-                newRow.innerHTML = `
-                    <td style="font-weight: bold;">${alimento}</td>
-                    <td colspan="4"></td>
-                `;
-            } else {
-                newRow.innerHTML = `
-                    <td>${alimento}</td>
-                    <td><select class="quantidade">${options.map(option => `<option value="${option}">${option}</option>`).join('')}</select></td>
-                    <td><select class="peguei">${options.map(option => `<option value="${option}">${option}</option>`).join('')}</select></td>
-                    <td><input type="text" class="valor-unitario" placeholder="R$ 0,00" oninput="formatCurrency(this)"></td>
-                    <td><input type="text" class="valor-atual" placeholder="R$ 0,00" oninput="formatCurrency(this)"></td>
-                `;
-            }
+            newRow.dataset.id = alimento.id; // Adiciona o ID ao <tr>
+    
+            newRow.innerHTML = `
+                <td>${alimento.nome}</td>
+                <td><select class="quantidade">${options.map(option => `<option value="${option}" ${option == alimento.quantidade ? 'selected' : ''}>${option}</option>`).join('')}</select></td>
+                <td><select class="peguei">${options.map(option => `<option value="${option}" ${option == alimento.peguei ? 'selected' : ''}>${option}</option>`).join('')}</select></td>
+                <td><input type="text" class="valor-unitario" value="R$ ${alimento.valor_unitario.toFixed(2).replace('.', ',')}" oninput="formatCurrency(this)"></td>
+                <td><input type="text" class="valor-atual" value="R$ ${alimento.valor_atual.toFixed(2).replace('.', ',')}" oninput="formatCurrency(this)"></td>
+            `;
             tabelaBody.appendChild(newRow);
         });
     }
+    
 
     renderizarAlimentos(alimentos);
 
@@ -127,18 +123,39 @@ document.addEventListener("DOMContentLoaded", function() {
       }
       
 
+  // Função para atualizar o alimento no servidor
     async function atualizarAlimento(id, dados) {
-        try {
-            await fetch(`/alimentos/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
-            });
-        } catch (error) {
-            console.error('Erro ao atualizar alimento:', error);
+    try {
+        const response = await fetch(`/alimentos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados),
+        });
+        if (!response.ok) {
+            throw new Error('Erro ao atualizar alimento no servidor.');
         }
+    } catch (error) {
+        console.error('Erro ao atualizar alimento:', error);
     }
+}
 
+// Adicionar um evento de 'change' para salvar dados no servidor
+tabelaBody.addEventListener('change', async function(event) {
+    const target = event.target;
+    const row = target.closest('tr');
+    const id = row.dataset.id; // Certifique-se de que o ID do alimento esteja no 'data-id' do <tr>
+
+    const quantidade = row.querySelector('select.quantidade').value;
+    const peguei = row.querySelector('select.peguei').value;
+    const valorUnitario = parseFloat(row.querySelector('.valor-unitario').value.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    const valorAtual = calcularValorAtual(row);
+
+    // Atualize o alimento no banco de dados SQLite via servidor
+    await atualizarAlimento(id, { quantidade, peguei, valor_unitario: valorUnitario, valor_atual: valorAtual });
+
+    // Atualize os totais
+    updateTotal(target);
+});
     const API_URL = 'https://brunasolemar.github.io/alimentos';
 
   // Função para salvar dados no Local Storage

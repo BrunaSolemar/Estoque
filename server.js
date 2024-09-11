@@ -45,7 +45,7 @@ app.put('/alimentos/:id', (req, res) => {
       if (err) {
         res.status(500).send("Erro ao atualizar o alimento");
       } else {
-        res.sendStatus(200);
+        res.sendStatus(200); // Sucesso
       }
     }
   );
